@@ -3,7 +3,6 @@
  * 1.Set 활용 유일한 값 추출
  * 2.Destructuring으로 getReandomNumber 함수에 변수를 전달 함수를 전달한다. 
  */
-
  const SETTING = {
    name : "LUCKY LOTTO!",
    count : 6,
