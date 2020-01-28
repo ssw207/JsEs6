@@ -12,7 +12,7 @@ const body = document.querySelector('body');
 body.innerHTML = '<p>hello world</p>'
 
 _.log('my first test data');
-_.log('getTIme is ${getTime()}'); // 템플릿 작동하지 않음
+_.log(`getTIme is ${getTime()}`);
 
 const logger = new MyLogger(); // 생성자 함수 호출
 _.log(logger.getCurrentHour());
