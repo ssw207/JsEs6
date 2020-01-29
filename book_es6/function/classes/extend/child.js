@@ -30,12 +30,5 @@ class FoodCoupon extends Coupon {
  getExpirationMessage() {
    return `만료`;
  }
-
-  
 }
-
-// const foodCoupon = new FoodCoupon(10, '1초');
-// console.log(flash.price);
-// foodCoupon.getPriceText();
-
 export default FoodCoupon;

@@ -299,6 +299,58 @@ describe('Food 쿠폰', () => {
 ```
 ### 클래스로 기존의 프로토 타입을 확장하라
 ### get과 set으로 인터페이스를 단순하게 만들어라
-상단 설명
 ### 제너레이터로 이터러블 속성을 생성하라
+1. 제너레이터 사용시 이터레이터로 배열처럼 제어할수 있게된다. (of 로 순회가능, [...제너레이터함수()] 할당가능)
+```
+// 제너레이터 생성 
+function* getBooks() {
+  yield 'book1'; // yield 외부에 공개
+  yield 'book2';
+  yield 'book3';
+  yield 'book4';
+  'book5'
+}
+
+/**
+ * 제너레이터매서드().next()실행시 yield 데이터가 한줄씩 리턴된다.
+ */
+const books = getBooks(); 
+console.log(books.next()); //{ value: 'book1', done: false }
+console.log(books.next()); //{ value: 'book2', done: false }
+console.log(books.next()); //{ value: 'book3', done: false }
+console.log(books.next()); //{ value: 'book4', done: false }
+console.log(books.next()); //{ value: undefined, done: true }
+
+const books2 = getBooks(); 
+console.log([...books2]); //[ 'kim-parent', 'kim-child1', 'kim-child2' ]
+
+let myBookList = {
+  'defaultBook1': true,
+  'defaultBook2': true,
+}
+
+/**
+ * 배열처럼 of로 순회가능
+ * 객체는 이터레이터가 없으므로 of로 순회불가능하다.
+ */
+for (let book of getBooks()) { 
+  myBookList[book] = false;
+}
+
+console.log(myBookList);
+// {
+//   defaultBook1: true,
+//   defaultBook2: true,
+//   book1: false,
+//   book2: false,
+//   book3: false,
+//   book4: false
+// }
+```
+
+1. 제너레이터는 트리구조등 복잡한 자료구조를 외부에 노출시키지 않게 하기위해 사용한다.
+```
+
+```
+
 ### bind()로 문맥 문제를 해결하라
