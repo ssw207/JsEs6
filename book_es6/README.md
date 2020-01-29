@@ -117,3 +117,188 @@ const f2 = p1 => p2 => p3 => p1+p2+p3
 
 ### 화살표 함수로 문맥 혼동을 피하라(작성중)
 화살표 함수 사용시 this는 현재 문맥을 유지한다.
+
+## 8.클래스로 인터페이스를 간결하게 유지하라
+### 읽기 쉬운 클래스를 만들어라
+1. es6의 클래스문법의 java의 클래스문법과 비슷하지만 실제로는 기존의 es5의 프로토 타입을 쓰기쉽게 바꾼것이다.
+1. JS에서 접근제한자를 지원되지 않는다.(관례적으로 필드앞에 _ 를 붙임)
+1. 함수앞에 get, set을 붙여서 getter, setter를 유사하게 작성가능(필드명과 동일하면 에러발생)
+
+```
+class MyClass { // 클래스명, 관용적으로 첫글자는 대문자로 쓴다.
+  constructor(msg, name) { // 생성자, 클래스를 생성시 인지를 받을수 있다.
+    console.log('생성자의 this는?', this); // MyClass
+    this._msg = msg; // js는 접근제한이 불가능하다. 관용적으로 _가 붙으면 private을 뜻한다.
+    this._name = name || '기본 이름';
+    /**
+     * get와 인수가 동일하면 set으로만 설정가능하다는 에러가 발생한다.
+     * TypeError: Cannot set property msg of #<MyClass> which has only a getter
+     */
+    // this.msg= '인수msg';
+  }
+  
+  /**
+   * 만약 인수를 msg로 동일하게 설정시 get,set과 혼돈되어 에러가 발생한다.
+   * java의 getter와 동일
+   * ex)const myClass = new MyClass('테스트')
+   * myClass.msg 호출시 실행
+   */
+  get msg() {
+    console.log(`${this._msg} 출력!!`);
+  }
+
+  /**
+   * ex)const myClass = new MyClass('테스트')
+   * myClass.msg = '변경'; 
+   */
+  set msg(msg) {
+    console.log('set msg 실행',msg);
+    this._msg = msg;
+  }
+
+  getFullMsg() {
+    console.log(this._name + this._msg);
+  }
+}
+
+const myClass = new MyClass('테스트'); //생성자로 인자를 전달.
+myClass.msg = '변경';
+myClass.msg;
+myClass.getFullMsg();
+```
+
+### 상속으로 메서드를 공유하라
+1. 클래스에 상속사용시 prototype 으로 부모-자식이 연결된다.
+1. 생성자에 인자를 전달해 속성을 설정할수 있다.
+1. 클래스에 매서드를 작성 할 수 있다.
+1. 클래스 내부에서 this로 클래스의 함수, 속성에 접근 할 수 있다.
+1. 생성자 내부에서 super(인자)로 부모의 생성자를 호출 할 수 있다.
+1. 자식의 클래스는 부모의 인자, 함수를 호출 할 수 있다.
+1. 자식의 클래스 내부에서 매서드 오버라이딩을 할 수 있다.
+
+```
+class Coupon {
+  constructor(price, expiration) {
+    this.price = price;
+    this.expiration = expiration || '2주';
+  }
+
+  getPriceText() {
+    return `$ ${this.price}`;
+  }
+
+  getExpirationMessage() {
+    return `이 쿠폰은 ${this.expiration} 후에 만료됩니다.`;
+  }
+
+  isRewardsEligible(user) {
+    return user.rewardsEligible && user.active;
+  }
+
+  getRewards(user) {
+    if (this.isRewardsEligible(user)) {
+      this.price = this.price * 0.9;
+    }
+  }
+}
+
+export default Coupon;
+```
+
+```
+import Coupon from './extend';
+
+class FoodCoupon extends Coupon {
+  constructor(price, expiration) {
+    super(price);
+    this.expiration = expiration || '30분';
+  }
+
+  /* 
+  // Coupon의 함수 호출가능
+  getPriceText() {
+      return `${this.price}원`
+    }
+
+    getExpirationMessage() {
+      return `${this.expiration} 일 뒤 만료됩니다.`;
+    }
+
+    isActive(user) {
+      return user.active;
+    }
+
+    getDiscount(user) {
+      if (this.isActive(user)) {
+        console.log('할인적용!!');
+        this.price = this.price * 0.9;
+      }
+    }
+  */
+ getExpirationMessage() {
+   return `만료`;
+ }
+}
+export default FoodCoupon;
+```
+테스트 케이스
+```
+import expect from 'expect';
+import Coupon from './extend';
+import FoodCoupon from './child';
+ 
+describe('coupon', () => {
+  it('유효한 사용자에게 쿠폰을 적용할 수 있다.', () => {
+    const coupon = new Coupon(10);
+    const user = {
+      active: true
+    };
+    expect(coupon.price).toEqual(10);
+    coupon.getDiscount(user);
+    expect(coupon.price).toEqual(9);
+  });
+
+  it('유효하지 않은 사용자는 쿠폰을 적용할 수 없다.', () => {
+    const coupon = new Coupon(10);
+    const user = {
+      active: false
+    };
+    expect(coupon.price).toEqual(10);
+    coupon.getDiscount(user);
+    expect(coupon.price).toEqual(10);
+  });
+})
+
+describe('Food 쿠폰', () => {
+  it('부모의 생성자를 호출할 수 있다.', () => {
+    const foodCoupon = new FoodCoupon(10);
+    expect(foodCoupon.price).toEqual(10);
+  });
+  
+  it('부모의 매서드를 호출 할 수 있다.', () => {
+    const foodCoupon = new FoodCoupon(10);
+    expect(foodCoupon.getPriceText()).toEqual('10원');
+  });
+
+  it('부모의 매서드를 덮어쓸 수 있다.', () => {
+    const foodCoupon = new FoodCoupon(10);
+    expect(foodCoupon.getExpirationMessage()).toEqual('만료'); 
+  });
+
+  it('20원 이상 구매하면 할인 된다.', () => {
+    const foodCoupon = new FoodCoupon(100);
+    const user = {
+      active: true
+    }
+    foodCoupon.getDiscount(user)
+    expect(foodCoupon.price).toEqual(90); 
+  });
+})
+
+ 
+```
+### 클래스로 기존의 프로토 타입을 확장하라
+### get과 set으로 인터페이스를 단순하게 만들어라
+상단 설명
+### 제너레이터로 이터러블 속성을 생성하라
+### bind()로 문맥 문제를 해결하라
