@@ -350,7 +350,116 @@ console.log(myBookList);
 
 1. 제너레이터는 트리구조등 복잡한 자료구조를 외부에 노출시키지 않게 하기위해 사용한다.
 ```
+class Family {
+  constructor(){
+    this.family = {
+      name:'kim-parent',
+      child: {
+        name: 'kim-child1',
+        child: {
+          name : 'kim-child2'
+        }
+      }
+    }
+  }
 
+  *[Symbol.iterator]() { // 객체 생성시 yield로 선언한 변수들이 이터레이터로 등록됨
+    let node = this.family
+    while (node) {
+      yield node.name;
+      node = node.child;
+    }
+  }
+}
+
+const family = new Family();
+console.log([...family]); // [ 'kim-parent', 'kim-child1', 'kim-child2' ]
 ```
 
 ### bind()로 문맥 문제를 해결하라
+기본적으로 this는 실행 문맥에 따른다.
+가령 MyClass 객체를 생성하고 c.myMethodCallMap() 내부함수에 접근하게 되면 
+MyClass객채에서 함수를 실행 했기 때문에 내부함수의 this는 MyClass가 된다.
+문재는  myMethodCallMap() 함수 내부에서 .map() 함수의 콜백이 실행되면 this의 문맥이 바뀌게되어
+의도와 다르게 this는 MyClass를 나타내지 않는다.
+
+```
+class MyClass {
+  constructor() {
+    this.arr = [1,2,3]; // this === MyClass
+    this.msg = '호출';
+  };
+
+  myMethod() {
+    return this.msg; // this === MyClass
+  }
+
+  myMethodCallMap() {
+    // 화살표함수는 문맥을 바꾸지 않는다.
+    const msgArr = this.arr.map(v => { 
+      v + this.msg // this === MyClass
+    }); // [ '1호출', '2호출', '3호출' ]
+
+    // 화살표 함수사용x , map함수의 실행 문맥으로 변경한다.
+    const msgArr2 = this.arr.map(function(v) { 
+      return v + this.msg; // Cannot read property 'msg' of undefined
+    }); 
+  }
+}
+
+const c = new MyClass();
+c.myMethod();
+c.myMethodCallMap();
+```
+
+이런 문제를 해결하기 위해서 
+1. 화살표함수를 사용한다
+화살표 함수는 this의 문맥을 바꾸지 않는다. 
+
+```
+ const msgArr = this.arr.map(v => { 
+      v + this.msg // this === MyClass
+    }); // [ '1호출', '2호출', '3호출' ]
+```
+위의 예제처럼 화살표 함수를 사용하면 this의 문맥을 바꾸지 않기 때문에 MyClass가 호출된다.
+
+1. 함수.bind()를 사용한다.
+함수.bind(객체) 를 실행하면 함수내부의 this는 객체를 가르키게된다.
+따라서 클래스 내부에서 this는 클래스를 가르키므로 클래스 내부의 콜백함수에 bind(this)를 사용하면
+콜백 내부에서 this를 문맥의 변경없이 사용가능하다.
+콜백 사용시마다 .bind()를 사용하는것은 번거로우므로 생성자에 함수 = 함수.bind(this)를 등록하여 사용한다.
+
+```
+class MyClass {
+  constructor() {
+    this.arr = [1,2,3]; // this === MyClass
+    this.msg = '호출';
+    this.callback2 = this.callback2.bind(this);
+  };
+
+  myMethodCallMap() {
+    // 화살표 함수사용x , map함수의 실행 문맥으로 변경한다.
+    const callback = function(v) { 
+      return v + this.msg;
+    }
+    
+    const msgArr = this.arr.map(callback.bind(this)); // 함수.bind(객체) : 함수의 this는 bind의 인자를 가르킨다.
+    console.log('myMethodCallMap',msgArr);
+  }
+
+  callback2 = function(v) { 
+    return v + this.msg;
+  }
+
+  myMethodCallMap2() {
+    // 화살표 함수사용x , map함수의 실행 문맥으로 변경한다.
+    const msgArr = this.arr.map(this.callback2); // 함수.bind(객체) : 함수의 this는 bind의 인자를 가르킨다.
+    console.log('myMethodCallMap2',msgArr);
+  }
+}
+
+const c = new MyClass();
+c.myMethodCallMap();
+c.myMethodCallMap2();
+```
+
