@@ -463,3 +463,8 @@ c.myMethodCallMap();
 c.myMethodCallMap2();
 ```
 
+## 외부 데이터에 접근하라
+### 프라미스를 이용해 비동기적으로 데이터를 가져오라
+### async/await로 함수를 명료하세 생성하라
+### fetch로 간단한 AJAX 호출을 처리하라
+### localStorage로 상태를 장기간 유지하라
