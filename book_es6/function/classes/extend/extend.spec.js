@@ -4,13 +4,13 @@ import FoodCoupon from './child';
  
 describe('coupon', () => {
   it('유효한 사용자에게 쿠폰을 적용할 수 있다.', () => {
-    const coupon = new Coupon(10);
+    const coupon = new Coupon(100);
     const user = {
       active: true
     };
-    expect(coupon.price).toEqual(10);
+    expect(coupon.price).toEqual(100);
     coupon.getDiscount(user);
-    expect(coupon.price).toEqual(9);
+    expect(coupon.price).toEqual(90);
   });
 
   it('유효하지 않은 사용자는 쿠폰을 적용할 수 없다.', () => {

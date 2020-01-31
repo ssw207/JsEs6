@@ -21,6 +21,8 @@ class MyClass {
   }
 }
 
-const c = new MyClass();
-c.myMethod();
-c.myMethodCallMap();
+//const c = new MyClass();
+//c.myMethod();
+//c.myMethodCallMap();
+
+export default MyClass;

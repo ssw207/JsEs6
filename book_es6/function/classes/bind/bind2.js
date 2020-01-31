@@ -1,4 +1,4 @@
-class MyClass {
+class MyClass2 {
   constructor() {
     this.arr = [1,2,3]; // this === MyClass
     this.msg = '호출';
@@ -26,6 +26,8 @@ class MyClass {
   }
 }
 
-const c = new MyClass();
-c.myMethodCallMap();
-c.myMethodCallMap2();
+// const c = new MyClass();
+// c.myMethodCallMap();
+// c.myMethodCallMap2();
+
+export default MyClass2;
