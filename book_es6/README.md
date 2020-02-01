@@ -465,6 +465,51 @@ c.myMethodCallMap2();
 
 ## 외부 데이터에 접근하라
 ### 프라미스를 이용해 비동기적으로 데이터를 가져오라
+비동기 통신으로 외부데이터에 외부데이터에 접근할때 콜백이 중첩되는 경우 가독성이 떨어진다. 
+프라미스를 이용하면 데이터를 내려줄수 있기 때문에 가독성이 높아진다.
+
+```
+new Promise((resolve, reject) => {
+  resolve()
+})
+```
+Promise객체가 정상적으로 실행하면 .then()으로 resolve의 콜백을 호출 할수 있으며
+에러가 발생하는경우 .catch()로 reject 콜백을 호출할 수 있다.
+
+```
+getUserData = (cb) => {
+  setTimeout(() => {
+    cb({name:'kim'})
+  }, 1000);
+}
+
+console.log("시작");
+getUserData(data => console.log(data.name));
+console.log("종료");
+```
+settimeout을 비동기 통신으로 가정하면 기존에는 위처럼 작성해야했으나 promise사용시 아래처럼 작성가능하다.
+
+```
+getUserData = (resolve, reject) => {
+  return new Promise((resolve,reject) => {
+    resolve({name:'kim'})
+  });
+}
+
+getUserData().then(data => console.log(data.name));
+```
+getUserData() 함수를 실행해 promise객체를 리턴받으면 .then()으로 resolve에
+콜백 data => console.log(data.name) 를 전달한다.
+
+```
+failUserData = (resolve, reject) => {
+  return new Promise((resolve,reject) => {
+    reject({message:'fail'})
+  });
+}
+
+failUserData().then().catch(data => console.log(data.message));
+```
 ### async/await로 함수를 명료하세 생성하라
 ### fetch로 간단한 AJAX 호출을 처리하라
 ### localStorage로 상태를 장기간 유지하라
