@@ -51,15 +51,52 @@ function str() {
 const는 { } 내부에 값만 유효하기 때문에 각각 다른값이 출력된다.
 
 ### 블록 유효 범위 변수로 정보를 격리하라
-var는 전역변수로 외부에서 접근시 동일한값을 고유한다.
+var는 전역변수로 외부에서 접근시 동일 한 값을 고유한다.
+아래의 li에 클릭이벤트를 추가한뒤 li를 클릭하면 1,2,3이 출력 될 것 같지만
+전역번호 var i의 값은 계속해서 변경되므로 for문의 순회가 끝난뒤 var i =3이므로
+클릭시 모두 3이 출력된다.
+```
+<ul>
+  <li>1</li>
+  <li>2</li> 
+  <li>3</li> 
+</ul>
+```
+```
+function loop() {
+  var uls = document.querySelectorAll('li');
+  for(var i=0; i<uls.length; i++) {
+    uls[i].addEventListener('click', function() {
+      alert(i);
+    })
+  }
+}
+```
+
+var대신 let i선언시 블록 유효범위를 가지므로
+for문이 루핑하면서 각각의 블럭별로 let i값을 가지게 되므로 
+li 클릭시 1,2,3이 출력된다.
 
 ```
 function loop() {
-  
+  var uls = document.querySelectorAll('li');
+  for(let i=0; i<uls.length; i++) {
+    uls[i].addEventListener('click', function() {
+      alert(i);
+    })
+  }
 }
 ```
 
 ### 템플릿 리터럴로 변수를 읽을수 있는 문자열로 변환하라.
+``${} 문자열``로 자바스크립트 변수의 값을 동적으로 문자열과 결합하룻 있다.
+```
+function getName() {
+  let fistName = 'hong';
+  let lastName = 'kim';
+  return `내이름은 ${fistName} ${lastName}입니다`;
+}
+```
 
 ## 2.배열로 데이터 컬랙션을 관리하라
 ## 3.특수한 컬렉션을 이용해 코드 명료성을 극대화하라
